@@ -133,6 +133,7 @@ static uint32_t gameObjectType_limestoneRockSmall;
 static uint32_t gameObjectType_limestoneRockLarge;
 static uint32_t gameObjectType_flint;
 static uint32_t gameObjectType_clay;
+static uint32_t gameObjectType_manure;
 
 static uint32_t gameObjectType_birchBranch;
 static uint32_t gameObjectType_pineBranch;
@@ -292,6 +293,7 @@ void spBiomeInit(SPBiomeThreadState* threadState)
 		gameObjectType_willowBranch = threadState->getGameObjectTypeIndex(threadState, "willowBranch");
 		gameObjectType_bambooBranch = threadState->getGameObjectTypeIndex(threadState, "bambooBranch");
 		gameObjectType_clay = threadState->getGameObjectTypeIndex(threadState, "clay");
+		gameObjectType_manure = threadState->getGameObjectTypeIndex(threadState, "manure");
 
 		gameObjectType_birchTypes[0] = threadState->getGameObjectTypeIndex(threadState, "birch1");
 		gameObjectType_birchTypes[1] = threadState->getGameObjectTypeIndex(threadState, "birch2");
@@ -1992,6 +1994,16 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 							{
 								ADD_OBJECT(gameObjectType_willowBranch);
 							}
+						}
+					}
+
+
+					int addManureCount = spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 913722, 400);
+					if(addManureCount < 4)
+					{
+						for(int i = 0; i < addManureCount; i++)
+						{
+							ADD_OBJECT(gameObjectType_manure);
 						}
 					}
 
