@@ -7,6 +7,7 @@
 #include <math.h>
 
 #define SP_METERS_TO_PRERENDER(_meters_) ((_meters_) / 8388608.0)
+#define SP_PRERENDER_TO_METERS(_prerender_) ((_prerender_) * 8388608.0)
 #define SP_RENDER_SCALE 100000.0
 #define SP_SUBDIVISIONS 22
 
