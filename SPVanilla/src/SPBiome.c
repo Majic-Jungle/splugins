@@ -60,6 +60,7 @@ static uint32_t terrainBaseType_desertRedSand;
 static uint32_t terrainBaseType_redRock;
 static uint32_t terrainBaseType_greenRock;
 static uint32_t terrainBaseType_graniteRock;
+static uint32_t terrainBaseType_marbleRock;
 static uint32_t terrainBaseType_lapisRock;
 static uint32_t terrainBaseType_dirt;
 static uint32_t terrainBaseType_richDirt;
@@ -85,6 +86,7 @@ static uint32_t terrainVariation_limestone;
 static uint32_t terrainVariation_redRock;
 static uint32_t terrainVariation_greenRock;
 static uint32_t terrainVariation_graniteRock;
+static uint32_t terrainVariation_marbleRock;
 static uint32_t terrainVariation_lapisRock;
 static uint32_t terrainVariation_flint;
 static uint32_t terrainVariation_clay;
@@ -140,6 +142,9 @@ static uint32_t gameObjectType_limestoneRockLarge;
 static uint32_t gameObjectType_graniteRock;
 static uint32_t gameObjectType_graniteRockSmall;
 static uint32_t gameObjectType_graniteRockLarge;
+static uint32_t gameObjectType_marbleRock;
+static uint32_t gameObjectType_marbleRockSmall;
+static uint32_t gameObjectType_marbleRockLarge;
 static uint32_t gameObjectType_lapisRock;
 static uint32_t gameObjectType_lapisRockSmall;
 static uint32_t gameObjectType_lapisRockLarge;
@@ -239,6 +244,7 @@ void spBiomeInit(SPBiomeThreadState* threadState)
 	terrainBaseType_redRock									= threadState->getTerrainBaseTypeIndex(threadState, "redRock");
 	terrainBaseType_greenRock								= threadState->getTerrainBaseTypeIndex(threadState, "greenRock");
 	terrainBaseType_graniteRock								= threadState->getTerrainBaseTypeIndex(threadState, "graniteRock");
+	terrainBaseType_marbleRock								= threadState->getTerrainBaseTypeIndex(threadState, "marbleRock");
 	terrainBaseType_lapisRock								= threadState->getTerrainBaseTypeIndex(threadState, "lapisRock");
 	terrainBaseType_dirt									= threadState->getTerrainBaseTypeIndex(threadState, "dirt");
 	terrainBaseType_richDirt								= threadState->getTerrainBaseTypeIndex(threadState, "richDirt");
@@ -273,6 +279,7 @@ void spBiomeInit(SPBiomeThreadState* threadState)
 	terrainVariation_redRock								= threadState->getTerrainVariation(threadState, "redRock");
 	terrainVariation_greenRock								= threadState->getTerrainVariation(threadState, "greenRock");
 	terrainVariation_graniteRock							= threadState->getTerrainVariation(threadState, "graniteRock");
+	terrainVariation_marbleRock							= threadState->getTerrainVariation(threadState, "marbleRock");
 	terrainVariation_lapisRock								= threadState->getTerrainVariation(threadState, "lapisRock");
 
 	terrainVariation_sandstoneRockTypes[0]					= threadState->getTerrainVariation(threadState, "sandstoneYellowRock");
@@ -327,6 +334,10 @@ void spBiomeInit(SPBiomeThreadState* threadState)
 		gameObjectType_graniteRock = threadState->getGameObjectTypeIndex(threadState, "graniteRock");
 		gameObjectType_graniteRockSmall = threadState->getGameObjectTypeIndex(threadState, "graniteRockSmall");
 		gameObjectType_graniteRockLarge = threadState->getGameObjectTypeIndex(threadState, "graniteRockLarge");
+
+		gameObjectType_marbleRock = threadState->getGameObjectTypeIndex(threadState, "marbleRock");
+		gameObjectType_marbleRockSmall = threadState->getGameObjectTypeIndex(threadState, "marbleRockSmall");
+		gameObjectType_marbleRockLarge = threadState->getGameObjectTypeIndex(threadState, "marbleRockLarge");
 
 		gameObjectType_lapisRock = threadState->getGameObjectTypeIndex(threadState, "lapisRock");
 		gameObjectType_lapisRockSmall = threadState->getGameObjectTypeIndex(threadState, "lapisRockSmall");
@@ -824,13 +835,16 @@ static const double DEEP_SEA_LEVEL = SP_METERS_TO_PRERENDER(-1.1);
 #define getIsGraniteRock() (noiseValueMed > -0.05 && noiseValueMed < 0.05 && noiseValue > 0.2 && noiseValueSmall < -0.2)
 #define getIsCopperOre() (noiseValueMed > -0.05 && noiseValueMed < 0.05 && noiseValue < -0.2 && noiseValueSmall > -0.2)
 
+#define getIsMarbleRock() (noiseValue > -0.05 && noiseValue < 0.05 && noiseValueMed < -0.2 && noiseValueSmall > -0.2)
+
 #define getIsLimestone() (noiseValueMed > 0.2 && noiseValue < 0.2 + noiseValueSmall * 0.5)
 #define getIsLapisRock() (noiseValueMed > 0.3 && noiseValue > 0.3 && noiseValueSmall < -0.3)
-#define getIsSandstone() (noiseValueMed > 0.1 && noiseValue < 0.1 + noiseValueSmall * 0.5 - soilRichnessNoiseValue * 0.5)
+
+#define getIsSandstone() (noiseValue < -0.7 + noiseValueSmall * 0.5 - soilRichnessNoiseValue * 0.5)
 
 #define getIsTinOre() (noiseValueMed > 0.2 && noiseValue > -0.1 && noiseValue < 0.1 && noiseValueSmall > -0.2)
 
-#define getSandstoneTypeIndex() ((int)(fmod(SP_PRERENDER_TO_METERS(baseAltitude) * 0.05 + noiseValueMed + noiseValue, 3.999)))
+#define getSandstoneTypeIndex() ((int)(fmod(SP_PRERENDER_TO_METERS(0.5 + baseAltitude) * 0.05 + noiseValue * 10.0, 3.999)))
 
 
 SPSurfaceTypeResult spBiomeGetSurfaceTypeForPoint(SPBiomeThreadState* threadState,
@@ -972,6 +986,7 @@ SPSurfaceTypeResult spBiomeGetSurfaceTypeForPoint(SPBiomeThreadState* threadStat
 		bool isRedRock = getIsRedRock();
 		bool isGreenRock = getIsGreenRock();
 		bool isGraniteRock = getIsGraniteRock();
+		bool isMarbleRock = getIsMarbleRock();
 		bool isLapisRock = getIsLapisRock();
 		bool isCopperOre = getIsCopperOre();
 		bool isTinOre = getIsTinOre();
@@ -1041,6 +1056,10 @@ SPSurfaceTypeResult spBiomeGetSurfaceTypeForPoint(SPBiomeThreadState* threadStat
 			if(isGraniteRock)
 			{
 				result.surfaceBaseType = terrainBaseType_graniteRock;
+			}
+			else if(isMarbleRock)
+			{
+				result.surfaceBaseType = terrainBaseType_marbleRock;
 			}
 			else if(isLapisRock)
 			{
@@ -1152,6 +1171,10 @@ SPSurfaceTypeResult spBiomeGetSurfaceTypeForPoint(SPBiomeThreadState* threadStat
 		if(isGraniteRock)
 		{
 			variations[result.variationCount++] = terrainVariation_graniteRock;
+		}
+		else if(isMarbleRock)
+		{
+			variations[result.variationCount++] = terrainVariation_marbleRock;
 		}
 		else if(isLapisRock)
 		{
@@ -1792,6 +1815,7 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 						bool isRedRock = getIsRedRock();
 						bool isGreenRock = getIsGreenRock();
 						bool isGraniteRock = getIsGraniteRock();
+						bool isMarbleRock = getIsMarbleRock();
 						bool isLapisRock = getIsLapisRock();
 						bool isSandstone = getIsSandstone();
 						int sandstoneTypeIndex = 0;
@@ -1820,6 +1844,10 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 						if(isGraniteRock)
 						{
 							rockType = gameObjectType_graniteRockLarge;
+						}
+						else if(isMarbleRock)
+						{
+							rockType = gameObjectType_marbleRockLarge;
 						}
 						else if(isLapisRock)
 						{
@@ -2077,6 +2105,7 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 						bool isRedRock = getIsRedRock();
 						bool isGreenRock = getIsGreenRock();
 						bool isGraniteRock = getIsGraniteRock();
+						bool isMarbleRock = getIsMarbleRock();
 						bool isLapisRock = getIsLapisRock();
 						bool isCopperOre = getIsCopperOre();
 						bool isTinOre = getIsTinOre();
@@ -2123,6 +2152,10 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 						if(isGraniteRock)
 						{
 							rockType = gameObjectType_graniteRock;
+						}
+						else if(isMarbleRock)
+						{
+							rockType = gameObjectType_marbleRock;
 						}
 						else if(isLapisRock)
 						{
@@ -2230,6 +2263,7 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 						bool isRedRock = getIsRedRock();
 						bool isGreenRock = getIsGreenRock();
 						bool isGraniteRock = getIsGraniteRock();
+						bool isMarbleRock = getIsMarbleRock();
 						bool isLapisRock = getIsLapisRock();
 						bool isSandstone = getIsSandstone();
 						int sandstoneTypeIndex = 0;
@@ -2268,6 +2302,10 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 						if(isGraniteRock)
 						{
 							rockType = gameObjectType_graniteRockSmall;
+						}
+						else if(isMarbleRock)
+						{
+							rockType = gameObjectType_marbleRockSmall;
 						}
 						else if(isLapisRock)
 						{
