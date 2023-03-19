@@ -20,6 +20,26 @@ typedef struct SPSurfaceTypeDefault {
 	uint8_t pathDifficultyIndex;
 } SPSurfaceTypeDefault;
 
+typedef struct SPSimpleObjectSpawnerInfo {
+	uint32_t objectTypeIndex;
+	uint16_t addLevel;
+	uint16_t requiredTagsCount;
+	uint16_t* requiredTags;
+	uint16_t disallowedTagsCount;
+	uint16_t* disallowedTags;
+
+	double frequency;
+	double minAltitude;
+	double maxAltitude;
+
+} SPSimpleObjectSpawnInfo;
+
+
+typedef struct SPSimpleObjectSpawnerCollection {
+	uint32_t objectSpawnerCount;
+	SPSimpleObjectSpawnInfo* objectInfos;
+} SPSimpleObjectSpawnerCollection;
+
 typedef struct SPBiomeThreadState {
 	void* terrainGenerator; //private
 	void* gom; //private
@@ -37,6 +57,8 @@ typedef struct SPBiomeThreadState {
 	SPSurfaceTypeDefault (*getSurfaceDefaultsForVariationType)(struct SPBiomeThreadState*,uint32_t);
 
 	uint32_t (*getSurfaceBaseTypeForFillObjectType)(struct SPBiomeThreadState*,uint32_t);
+
+	SPSimpleObjectSpawnerCollection* (*getSimpleObjectSpawnerCollection)(struct SPBiomeThreadState*);
 
 
 	SPRand* spRand;

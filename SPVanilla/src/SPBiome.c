@@ -190,6 +190,8 @@ static uint32_t gameObjectType_sandstoneRockTypes[SANDSTONE_TYPE_COUNT];
 static uint32_t gameObjectType_sandstoneRockSmallTypes[SANDSTONE_TYPE_COUNT];
 static uint32_t gameObjectType_sandstoneRockLargeTypes[SANDSTONE_TYPE_COUNT];
 
+static SPSimpleObjectSpawnerCollection* spawnerCollection;
+
 void spBiomeInit(SPBiomeThreadState* threadState)
 {
 	biomeTag_hot = threadState->getBiomeTag(threadState, "hot");
@@ -399,7 +401,10 @@ void spBiomeInit(SPBiomeThreadState* threadState)
 		gameObjectType_deadAlpaca = threadState->getGameObjectTypeIndex(threadState, "deadAlpaca");
 		gameObjectType_deadMammoth = threadState->getGameObjectTypeIndex(threadState, "deadMammoth");
 		gameObjectType_bone = threadState->getGameObjectTypeIndex(threadState, "bone");
+
+		spawnerCollection = threadState->getSimpleObjectSpawnerCollection(threadState);
 	}
+
 }
 
 double getSoilRichnessNoiseValue(SPBiomeThreadState* threadState, SPVec3 noiseLoc, double steepness, double riverDistance)
@@ -2220,14 +2225,14 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 					}
 
 
-					int addManureCount = spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 913722, 400);
+					/*int addManureCount = spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 913722, 400);
 					if(addManureCount < 4)
 					{
 						for(int i = 0; i < addManureCount; i++)
 						{
 							ADD_OBJECT(gameObjectType_manure);
 						}
-					}
+					}*/
 
 				}
 				else if(level == SP_SUBDIVISIONS - 1)
@@ -2321,5 +2326,34 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 			}
 		}
 	}
+
+
+	if(addedCount < BIOME_MAX_GAME_OBJECT_COUNT_PER_SUBDIVISION)
+	{
+		if(level >= SP_SUBDIVISIONS - 7)
+		{
+			for(unsigned int i = 0; i < spawnerCollection->objectSpawnerCount; i++)
+			{
+				SPSimpleObjectSpawnInfo* info = &(spawnerCollection->objectInfos[i]);
+
+				if(info->addLevel == level)
+				{
+					if(baseAltitude > info->minAltitude && baseAltitude < info->maxAltitude)
+					{
+						if(spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 51117 + i, 1 + 10 / info->frequency) == 0)
+						{
+							int objectCount = (((int)spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 5243, 40)) - 39 + info->frequency * 4);
+
+							for(int j = 0; j < objectCount; j++)
+							{
+								ADD_OBJECT(info->objectTypeIndex);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return addedCount;
 }
