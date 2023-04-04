@@ -67,6 +67,8 @@ typedef struct SPParticleThreadState {
 	SPRand* spRand;
 	SPNoise* spNoise;
 	SPVec3 playerPos;
+	SPVec3 windVelocity;
+	double windStrength;
 	double worldTime;
 	uint32_t frameCounter;
 } SPParticleThreadState;
