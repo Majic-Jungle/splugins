@@ -106,11 +106,19 @@ static SPParticleEmitterTypeInfo particleEmitterTypeInfos[EMITTER_TYPES_COUNT] =
 };
 
 //define the vertex attributes that the shader will use. In the vanilla mod, all currently take the same, but this could be different for more complex shaders
-#define VERTEX_ATTRIBUTE_COUNT 3
-static int vertexDescriptionTypes[VERTEX_ATTRIBUTE_COUNT] = {
+#define GENERIC_VERTEX_ATTRIBUTE_COUNT 3
+static int genericVertexDescriptionTypes[GENERIC_VERTEX_ATTRIBUTE_COUNT] = {
 	SPRenderGroupVertexDescriptionType_vec3, 
 	SPRenderGroupVertexDescriptionType_vec2,
 	SPRenderGroupVertexDescriptionType_vec4
+};
+
+#define RAIN_VERTEX_ATTRIBUTE_COUNT 4
+static int rainVertexDescriptionTypes[RAIN_VERTEX_ATTRIBUTE_COUNT] = {
+	SPRenderGroupVertexDescriptionType_vec3, 
+	SPRenderGroupVertexDescriptionType_vec2,
+	SPRenderGroupVertexDescriptionType_vec4,
+	SPRenderGroupVertexDescriptionType_vec3
 };
 
 //define render groups that we wish to use, override or add. To use an existing/predefined render group, either define again or set vertexDescriptionTypeCount to 0
@@ -119,8 +127,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{ 
 		"cloud",
 		sp_vanillaRenderGroupCloud,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/cloudsN.png",
 		"img/cloudsP.png",
 		true,
@@ -129,8 +137,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{ 
 		"cloudBlended",
 		sp_vanillaRenderGroupCloudBlended,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/cloudsN.png",
 		"img/cloudsP.png",
 		true,
@@ -139,8 +147,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"smokeParticle",
 		sp_vanillaRenderGroupSmoke,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -149,8 +157,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"fireParticle",
 		sp_vanillaRenderGroupFire,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -159,8 +167,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"particle",
 		sp_vanillaRenderGroupStandard,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -169,8 +177,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{ 
 		"spark",
 		sp_vanillaRenderGroupSpark,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -179,8 +187,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"waterRipples",
 		sp_vanillaRenderGroupWaterRipples,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -189,8 +197,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"particle",
 		sp_vanillaRenderGroupDust,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -199,8 +207,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"particleWeather",
 		sp_vanillaRenderGroupDustParticles,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -209,8 +217,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"particleWeather",
 		sp_vanillaRenderGroupSnow,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -219,8 +227,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"particleRain",
 		sp_vanillaRenderGroupRain,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		RAIN_VERTEX_ATTRIBUTE_COUNT,
+		rainVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -229,8 +237,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{
 		"particleRainBounce",
 		sp_vanillaRenderGroupRainBounce,
-		VERTEX_ATTRIBUTE_COUNT,
-		vertexDescriptionTypes,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -1409,17 +1417,35 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 
 
 	SPVec3 posLocal = spVec3Mul(spVec3Sub(particleState->p, origin), SP_RENDER_SCALE);
+
+	int attributeFloatCount = 9;
+	SPVec3 upVector;
+
+	if(localRenderGroupTypeID == sp_vanillaRenderGroupRain)
+	{
+		attributeFloatCount = 12;
+		SPVec3 normalVec = spVec3Normalize(particleState->p);
+		upVector = spVec3Normalize(spVec3Mix(normalVec, spVec3Normalize(spVec3Neg(threadState->windVelocity)), spClamp(threadState->windStrength * 0.25, 0.0, 0.67)));
+	}
+
 	for(int v = 0; v < 4; v++)
 	{
-		renderBuffer[v * 9 + 0] = posLocal.x;
-		renderBuffer[v * 9 + 1] = posLocal.y;
-		renderBuffer[v * 9 + 2] = posLocal.z;
-		renderBuffer[v * 9 + 3] = texCoords[v].x;
-		renderBuffer[v * 9 + 4] = texCoords[v].y;
-		renderBuffer[v * 9 + 5] = particleState->particleTextureType;
-		renderBuffer[v * 9 + 6] = particleState->lifeLeft;
-		renderBuffer[v * 9 + 7] = particleState->randomValueA;
-		renderBuffer[v * 9 + 8] = particleState->scale;
+		renderBuffer[v * attributeFloatCount + 0] = posLocal.x;
+		renderBuffer[v * attributeFloatCount + 1] = posLocal.y;
+		renderBuffer[v * attributeFloatCount + 2] = posLocal.z;
+		renderBuffer[v * attributeFloatCount + 3] = texCoords[v].x;
+		renderBuffer[v * attributeFloatCount + 4] = texCoords[v].y;
+		renderBuffer[v * attributeFloatCount + 5] = particleState->particleTextureType;
+		renderBuffer[v * attributeFloatCount + 6] = particleState->lifeLeft;
+		renderBuffer[v * attributeFloatCount + 7] = particleState->randomValueA;
+		renderBuffer[v * attributeFloatCount + 8] = particleState->scale;
+
+		if(localRenderGroupTypeID == sp_vanillaRenderGroupRain)
+		{
+			renderBuffer[v * attributeFloatCount + 9] = upVector.x;
+			renderBuffer[v * attributeFloatCount + 10] = upVector.y;
+			renderBuffer[v * attributeFloatCount + 11] = upVector.z;
+		}
 	}
 		
 	return true;

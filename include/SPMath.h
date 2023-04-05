@@ -95,6 +95,7 @@ MJ_EXPORT SPVec2 spVec2Mul(SPVec2 a, double b);
 MJ_EXPORT SPVec2 spVec2MulVec2(SPVec2 a, SPVec2 b);
 MJ_EXPORT SPVec2 spVec2Div(SPVec2 a, double b);
 MJ_EXPORT SPVec2 spVec2Neg(SPVec2 a);
+MJ_EXPORT SPVec2 spVec2Mix(SPVec2 x, SPVec2 y, double a);
 
 MJ_EXPORT SPVec3 spVec3Add(SPVec3 a, SPVec3 b);
 MJ_EXPORT SPVec3 spVec3Sub(SPVec3 a, SPVec3 b);
@@ -102,6 +103,7 @@ MJ_EXPORT SPVec3 spVec3Mul(SPVec3 a, double b);
 MJ_EXPORT SPVec3 spVec3MulVec3(SPVec3 a, SPVec3 b);
 MJ_EXPORT SPVec3 spVec3Div(SPVec3 a, double b);
 MJ_EXPORT SPVec3 spVec3Neg(SPVec3 a);
+MJ_EXPORT SPVec3 spVec3Mix(SPVec3 x, SPVec3 y, double a);
 
 MJ_EXPORT SPVec4 spVec4Add(SPVec4 a, SPVec4 b);
 MJ_EXPORT SPVec4 spVec4Sub(SPVec4 a, SPVec4 b);
@@ -109,6 +111,7 @@ MJ_EXPORT SPVec4 spVec4MulVec4(SPVec4 a, SPVec4 b);
 MJ_EXPORT SPVec4 spVec4Mul(SPVec4 a, double b);
 MJ_EXPORT SPVec4 spVec4Div(SPVec4 a, double b);
 MJ_EXPORT SPVec4 spVec4Neg(SPVec4 a);
+MJ_EXPORT SPVec4 spVec4Mix(SPVec4 x, SPVec4 y, double a);
 
 MJ_EXPORT SPVec3 spVec3Normalize(SPVec3 v);
 MJ_EXPORT double spVec3Dot(SPVec3 a, SPVec3 b);

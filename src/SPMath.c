@@ -66,6 +66,15 @@ SPVec2 spVec2Neg(SPVec2 a)
 	return result;
 }
 
+SPVec2 spVec2Mix(SPVec2 x, SPVec2 y, double a)
+{
+	SPVec2 result = {
+		x.x + a * (y.x - x.x), 
+		x.y + a * (y.y - x.y)
+	};
+	return result;
+}
+
 SPVec3 spVec3Add(SPVec3 a, SPVec3 b)
 {
 	SPVec3 result = { a.x + b.x, a.y + b.y, a.z + b.z };
@@ -142,6 +151,17 @@ double spVec3Distance2(SPVec3 a, SPVec3 b)
 	return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
+
+SPVec3 spVec3Mix(SPVec3 x, SPVec3 y, double a)
+{
+	SPVec3 result = {
+		x.x + a * (y.x - x.x), 
+		x.y + a * (y.y - x.y), 
+		x.z + a * (y.z - x.z)
+	};
+	return result;
+}
+
 SPVec3 spVec3xMat3(SPVec3 v, SPMat3 m3)
 {
 	double* m = &(m3.m0);
@@ -194,6 +214,17 @@ SPVec4 spVec4Neg(SPVec4 a)
 SPVec4 spVec4Normalize(SPVec4 v)
 {
 	return spVec4Div(v, sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w));
+}
+
+SPVec4 spVec4Mix(SPVec4 x, SPVec4 y, double a)
+{
+	SPVec4 result = {
+		x.x + a * (y.x - x.x), 
+		x.y + a * (y.y - x.y), 
+		x.z + a * (y.z - x.z), 
+		x.w + a * (y.w - x.w)
+	};
+	return result;
 }
 
 
