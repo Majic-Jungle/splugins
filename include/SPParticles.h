@@ -38,6 +38,7 @@ typedef struct SPParticleEmitterState {
 	double timeAccumulatorA;
 	double timeAccumulatorB;
 	SPVec4 userData; //can be used by mods
+	bool covered;
 	uint32_t globalType;
 	uint8_t counters[4];
 } SPParticleEmitterState;
@@ -46,6 +47,7 @@ typedef struct SPParticleEmitterStateUpdate {
 	SPVec3 p;
 	SPMat3 rot;
 	SPVec4 userData; //can be used by mods
+	bool covered;
 } SPParticleEmitterStateUpdate;
 
 typedef struct SPParticleState {
