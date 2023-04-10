@@ -1541,7 +1541,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 
 		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.2);
 		particleState->v = spVec3Add(particleState->v, spVec3Mul(spMat3GetRow(emitterState->rot, frameAxisIndex), SP_METERS_TO_PRERENDER(noiseValue * windStrength) * dt));
-		particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt));
+		particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.1));
 
 		particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v, dt));
 
@@ -1588,10 +1588,10 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	}
 	else
 	{
-		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.05);
+		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.1);
 		if(!emitterState->covered)
 		{
-			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt));
+			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.1));
 		}
 		particleState->v = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, dt));
 		particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v, dt));
