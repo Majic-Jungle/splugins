@@ -199,8 +199,8 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{ 
 		"spark",
 		sp_vanillaRenderGroupSpark,
-		GENERIC_VERTEX_ATTRIBUTE_COUNT,
-		genericVertexDescriptionTypes,
+		EXTRA_VEC3_VERTEX_ATTRIBUTE_COUNT,
+		extraVec3VertexDescriptionTypes,
 		"img/particles.png",
 		NULL,
 		false,
@@ -1295,13 +1295,18 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 					SPParticleState state;
 
 					state.p = spVec3Add(spVec3Mul(normalizedPos, posLength + SP_METERS_TO_PRERENDER(0.1)), randPosVec);
-					state.v = spVec3Mul(spVec3Add(normalizedPos, randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5));
+					state.v = spVec3Mul(spVec3Add(normalizedPos, randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 0.5);
 					state.particleTextureType = 3;
 					state.lifeLeft = 1.0;
 					state.scale = 0.01 + spRandGetValue(spRand) * 0.02;
 					state.randomValueA = spRandGetValue(spRand);
 					state.randomValueB = spRandGetValue(spRand);
 					state.gravity = spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(1.0));
+
+					if(!emitterState->covered)
+					{
+						state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, 0.5));
+					}
 
 					(*threadState->addParticle)(threadState->particleManager,
 						emitterState,
@@ -1623,6 +1628,11 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 			upVector = normalVec;
 		}
 	}
+	else if(localRenderGroupTypeID == sp_vanillaRenderGroupSpark)
+	{
+		attributeFloatCount = 12;
+		upVector = spVec3Normalize(particleState->v);
+	}
 
 	for(int v = 0; v < 4; v++)
 	{
@@ -1636,7 +1646,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 		renderBuffer[v * attributeFloatCount + 7] = particleState->randomValueA;
 		renderBuffer[v * attributeFloatCount + 8] = particleState->scale;
 
-		if(localRenderGroupTypeID == sp_vanillaRenderGroupRain || localRenderGroupTypeID == sp_vanillaRenderGroupFire)
+		if(localRenderGroupTypeID == sp_vanillaRenderGroupRain || localRenderGroupTypeID == sp_vanillaRenderGroupFire || localRenderGroupTypeID == sp_vanillaRenderGroupSpark)
 		{
 			renderBuffer[v * attributeFloatCount + 9] = upVector.x;
 			renderBuffer[v * attributeFloatCount + 10] = upVector.y;
