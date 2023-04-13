@@ -1062,15 +1062,16 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 					state.v = zeroVec;
 					for(int frameAxisIndex = 0; frameAxisIndex < 3; frameAxisIndex++)
 					{
-						double windStrength = 2.0;
-						SPVec3 lookup = {(pos.x + 1.2 + 0.1 * frameAxisIndex) * 999999.9, (pos.y + 1.1 + 0.1 * frameAxisIndex) * 999999.9, emitterState->timeAccumulatorB * 0.2 + (pos.z + 1.1 + 0.1 * frameAxisIndex) * 999999.9};
+						double windStrength = 8.0 + threadState->windStrength * 20.0;
+						SPVec3 lookup = {(pos.x + 1.2 + 0.1 * frameAxisIndex) * 1999999.9, (pos.y + 1.1 + 0.1 * frameAxisIndex) * 1999999.9, emitterState->timeAccumulatorB * 0.1 + (pos.z + 1.1 + 0.1 * frameAxisIndex) * 1999999.9};
 						double noiseValue = spNoiseGet(threadState->spNoise, lookup, 1);
 
 						if(frameAxisIndex == 1) //up/down
 						{
-							noiseValue -= 0.25;
+							noiseValue -= 0.5;
 						}
 						state.v = spVec3Add(state.v, spVec3Mul(spMat3GetRow(emitterState->rot, frameAxisIndex), SP_METERS_TO_PRERENDER(noiseValue * windStrength) * dt));
+						state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, dt * 6.0));
 					}
 
 					state.particleTextureType = 21;
@@ -1607,7 +1608,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	{
 		attributeFloatCount = 12;
 		SPVec3 normalVec = spVec3Normalize(particleState->p);
-		upVector = spVec3Normalize(spVec3Mix(normalVec, spVec3Normalize(spVec3Neg(threadState->windVelocity)), spClamp(threadState->windStrength * 0.25, 0.0, 0.67)));
+		upVector = spVec3Normalize(spVec3Mix(normalVec, spVec3Normalize(spVec3Neg(threadState->windVelocity)), spClamp(threadState->windStrength * 0.125, 0.0, 0.67)));
 	}
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupFire)
 	{
