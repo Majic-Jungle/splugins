@@ -32,7 +32,9 @@ enum {
 	sp_vanillaRenderGroupStandard,
 	sp_vanillaRenderGroupSpark,
 	sp_vanillaRenderGroupCloud,
+	sp_vanillaRenderGroupCloudWindDirBlown,
 	sp_vanillaRenderGroupCloudBlended,
+	sp_vanillaRenderGroupCloudBlendedWindDirBlown,
 	sp_vanillaRenderGroupWaterRipples,
 	sp_vanillaRenderGroupDust,
 	sp_vanillaRenderGroupDustParticles,
@@ -144,7 +146,7 @@ static int extraVec3VertexDescriptionTypes[EXTRA_VEC3_VERTEX_ATTRIBUTE_COUNT] = 
 
 
 //define render groups that we wish to use, override or add. To use an existing/predefined render group, either define again or set vertexDescriptionTypeCount to 0
-#define RENDER_GROUP_TYPES_COUNT 13
+#define RENDER_GROUP_TYPES_COUNT 15
 static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{ 
 		"cloud",
@@ -157,8 +159,28 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 		true,
 	},
 	{ 
+		"cloud",
+		sp_vanillaRenderGroupCloudWindDirBlown,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
+		"img/cloudsN.png",
+		"img/cloudsP.png",
+		true,
+		true,
+	},
+	{ 
 		"cloudBlended",
 		sp_vanillaRenderGroupCloudBlended,
+		GENERIC_VERTEX_ATTRIBUTE_COUNT,
+		genericVertexDescriptionTypes,
+		"img/cloudsN.png",
+		"img/cloudsP.png",
+		true,
+		true,
+	},
+	{ 
+		"cloudBlended",
+		sp_vanillaRenderGroupCloudBlendedWindDirBlown,
 		GENERIC_VERTEX_ATTRIBUTE_COUNT,
 		genericVertexDescriptionTypes,
 		"img/cloudsN.png",
@@ -515,9 +537,9 @@ void addClouds(SPParticleThreadState* threadState,
 			//if(randVec.z > 0.2)
 			{
 
-				state.lifeLeft = ((((double)x) + 0.5 * randVec.x) / cumulusSmallGridCount);
+				state.lifeLeft = 1.0;
 
-				double xPos = -cloudFieldHalfSize + cloudFieldSize * state.lifeLeft;
+				double xPos = -cloudFieldHalfSize + cloudFieldSize * ((((double)x) + 0.5 * randVec.x) / cumulusSmallGridCount);
 				double zPos = -cloudFieldHalfSize + cloudFieldSize * ((((double)y) + 0.5 * randVec.y) / cumulusSmallGridCount);
 
 				SPVec3 pos = spVec3Add(spVec3Mul(cumulusSmallRight, xPos), spVec3Mul(cumulusSmallNegZ, zPos));
@@ -537,19 +559,19 @@ void addClouds(SPParticleThreadState* threadState,
 					state.randomValueA = spRandGetValue(spRand);
 					state.scale = (randVec.z + 1.2) * cumulusSmallScale * (noiseValue + 0.7);
 
-					state.v = spVec3Mul(cumulusSmallRight,cloudFieldSize);
+					state.v = threadState->windVelocity;
 					state.userData.x = altitude;
 
 					(*threadState->addParticle)(threadState->particleManager,
 						emitterState,
-						sp_vanillaRenderGroupCloud,
+						sp_vanillaRenderGroupCloudWindDirBlown,
 						&state);
 
 					state.particleTextureType = (counter % 16) + 12 + 16;
 
 					(*threadState->addParticle)(threadState->particleManager,
 						emitterState,
-						sp_vanillaRenderGroupCloudBlended,
+						sp_vanillaRenderGroupCloudBlendedWindDirBlown,
 						&state);
 
 					counter++;
@@ -1294,7 +1316,15 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 
 					SPParticleState state;
 
-					state.p = spVec3Add(spVec3Mul(normalizedPos, posLength + SP_METERS_TO_PRERENDER(0.1)), randPosVec);
+					double heightOffsetMeters = 0.1;
+					if(localEmitterTypeID == sp_vanillaEmitterTypeKilnFire)
+					{
+						heightOffsetMeters = 1.7;
+					}
+
+					state.p = spVec3Add(spVec3Mul(normalizedPos, posLength + SP_METERS_TO_PRERENDER(heightOffsetMeters)), randPosVec);
+
+
 					state.v = spVec3Mul(spVec3Add(normalizedPos, randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 0.5);
 					state.particleTextureType = 3;
 					state.lifeLeft = 1.0;
@@ -1378,18 +1408,31 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	SPVec3 origin, 
 	float* renderBuffer)
 {
-	if(localRenderGroupTypeID == sp_vanillaRenderGroupCloud || localRenderGroupTypeID == sp_vanillaRenderGroupCloudBlended)
+	if(localRenderGroupTypeID == sp_vanillaRenderGroupCloud || localRenderGroupTypeID == sp_vanillaRenderGroupCloudBlended || 
+		localRenderGroupTypeID == sp_vanillaRenderGroupCloudWindDirBlown || localRenderGroupTypeID == sp_vanillaRenderGroupCloudBlendedWindDirBlown)
 	{
 
-		particleState->lifeLeft -= dt * cloudVelocity;
-		if(particleState->lifeLeft < 0.0)
+		if(localRenderGroupTypeID == sp_vanillaRenderGroupCloudWindDirBlown || localRenderGroupTypeID == sp_vanillaRenderGroupCloudBlendedWindDirBlown)
 		{
-			particleState->lifeLeft += 1.0;
-			particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v,  1.0));
+			particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.05);
+			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt));
+
+			particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v,  dt * 0.5));
+			particleState->p = spVec3Mul(spVec3Normalize(particleState->p), 1.0 + cumulusSmallAltitude);
+
 		}
 		else
 		{
-			particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v,  -dt * cloudVelocity));
+			particleState->lifeLeft -= dt * cloudVelocity;
+			if(particleState->lifeLeft < 0.0)
+			{
+				particleState->lifeLeft += 1.0;
+				particleState->p = spVec3Add(particleState->p, particleState->v);
+			}
+			else
+			{
+				particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v,  -dt * cloudVelocity));
+			}
 		}
 
 		particleState->p = spVec3Mul(spVec3Normalize(particleState->p), particleState->userData.x);
