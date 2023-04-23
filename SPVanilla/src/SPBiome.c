@@ -837,10 +837,10 @@ static const double DEEP_SEA_LEVEL = SP_METERS_TO_PRERENDER(-1.1);
 #define getIsRedRock() (noiseValueMed < -0.2 && noiseValue > 0.2 && noiseValueSmall > 0.2)
 #define getIsGreenRock() (noiseValueMed < -0.3 && noiseValue < -0.2 && noiseValueSmall > 0.2)
 
-#define getIsGraniteRock() (noiseValueMed > -0.05 && noiseValueMed < 0.05 && noiseValue > 0.2 && noiseValueSmall < -0.2)
+#define getIsGraniteRock() (noiseValueMed > -0.02 && noiseValueMed < 0.02 && noiseValue > 0.2 && noiseValueSmall < -0.2)
 #define getIsCopperOre() (noiseValueMed > -0.05 && noiseValueMed < 0.05 && noiseValue < -0.2 && noiseValueSmall > -0.2)
 
-#define getIsMarbleRock() (noiseValue > -0.05 && noiseValue < 0.05 && noiseValueMed < -0.2 && noiseValueSmall > -0.2)
+#define getIsMarbleRock() (noiseValue > -0.02 && noiseValue < 0.02 && noiseValueMed < -0.2 && noiseValueSmall > -0.2)
 
 #define getIsLimestone() (noiseValueMed > 0.2 && noiseValue < 0.2 + noiseValueSmall * 0.5)
 #define getIsLapisRock() (noiseValueMed > 0.3 && noiseValue > 0.3 && noiseValueSmall < -0.3)

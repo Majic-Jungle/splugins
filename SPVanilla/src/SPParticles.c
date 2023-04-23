@@ -24,6 +24,7 @@ enum {
 	sp_vanillaEmitterTypeKilnFire,
 	sp_vanillaEmitterTypeKilnFireMedium,
 	sp_vanillaEmitterTypeKilnFireSmall,
+	sp_vanillaEmitterTypeBlacksmithSparks,
 };
 
 enum {
@@ -48,7 +49,7 @@ enum {
 //define emitter types that we wish to override or add. Vanilla functions and functions for mods with earlier order indexes than this one that override the same type, will not get called.
 //Mods with later order indexes than this mod will win, so it's possible that even though you define behavior in the functions here, those functions may not actually get called..
 
-#define EMITTER_TYPES_COUNT 19
+#define EMITTER_TYPES_COUNT 20
 static SPParticleEmitterTypeInfo particleEmitterTypeInfos[EMITTER_TYPES_COUNT] = {
 	{
 		"campfireLarge",
@@ -125,6 +126,10 @@ static SPParticleEmitterTypeInfo particleEmitterTypeInfos[EMITTER_TYPES_COUNT] =
 	{
 		"kilnFireSmall",
 		sp_vanillaEmitterTypeKilnFireSmall
+	},
+	{
+		"blacksmithSparks",
+		sp_vanillaEmitterTypeBlacksmithSparks
 	},
 };
 
@@ -913,6 +918,66 @@ bool spEmitterWasAdded(SPParticleThreadState* threadState,
 		addClouds(threadState, emitterState);
 	}
 	break;
+	case sp_vanillaEmitterTypeBlacksmithSparks:
+	{
+		removeImmediately = true;
+		double posLength = spVec3Length(emitterState->p);
+		SPVec3 normalizedPos = spVec3Div(emitterState->p, posLength);
+		SPVec3 gravity = spVec3Mul(normalizedPos, SP_METERS_TO_PRERENDER(-10.0) * 0.2);
+
+		SPVec3 direction = spMat3GetRow(emitterState->rot, 2);//spVec3Mul(spMat3GetRow(emitterState->rot, 2), 0.5);
+		direction = spVec3Add(direction, normalizedPos); 
+		direction = spVec3Normalize(direction);
+
+		for(int i = 0; i < 20; i++)
+		{
+			SPVec3 randVec = spRandGetVec3(spRand);
+			SPVec3 randPosVec = spVec3Mul(randVec, SP_METERS_TO_PRERENDER(0.05));
+			SPVec3 randVelVec = spVec3Mul(randVec, SP_METERS_TO_PRERENDER(1.0));
+
+			SPParticleState state;
+
+			double heightOffsetMeters = -0.2;
+
+			state.p = spVec3Add(emitterState->p, randPosVec);
+
+
+			state.v = spVec3Mul(spVec3Add(normalizedPos, randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 0.5);
+			state.particleTextureType = 3;
+			state.lifeLeft = 0.9;
+			state.scale = 0.01 + spRandGetValue(spRand) * 0.01;
+			state.randomValueA = spRandGetValue(spRand);
+			state.randomValueB = spRandGetValue(spRand);
+			state.gravity = spVec3Add(gravity, spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(1.0)));
+
+			/*if(!emitterState->covered)
+			{
+				state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, 0.1));
+			}*/
+
+			(*threadState->addParticle)(threadState->particleManager,
+				emitterState,
+				sp_vanillaRenderGroupSpark,
+				&state);
+
+			/*SPParticleState state;
+			SPVec3 randPosVec = spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(0.3));
+			SPVec3 randVelVec = spRandGetVec3(spRand);
+			state.p = spVec3Add(spVec3Mul(normalizedPos, posLength), randPosVec);
+			state.v = spVec3Mul(spVec3Add(direction, randVelVec), SP_METERS_TO_PRERENDER(1.6));
+			state.particleTextureType = 7;
+			state.lifeLeft = 1.0;
+			state.randomValueA = 0.5 + (spRandGetValue(spRand) - 0.5) * 0.3;
+			state.gravity = gravity;
+			state.scale = 0.5 + spRandGetValue(spRand) * 0.5;
+
+			(*threadState->addParticle)(threadState->particleManager,
+				emitterState,
+				sp_vanillaRenderGroupSpark,
+				&state);*/
+		}
+	}
+	break;
 	}
 
 	if(!removeImmediately)
@@ -1179,7 +1244,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 					randPosVec = spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(0.1));
 					randPosVec = spVec3Add(randPosVec, spVec3Mul(normalizedPos, posLength + SP_METERS_TO_PRERENDER(0.2)));
 
-					if(localEmitterTypeID == sp_vanillaEmitterTypeKilnFire)
+					if(localEmitterTypeID == sp_vanillaEmitterTypeKilnFire || localEmitterTypeID == sp_vanillaEmitterTypeKilnFireMedium || localEmitterTypeID == sp_vanillaEmitterTypeKilnFireSmall)
 					{
 						randPosVec = spVec3Add(randPosVec, spVec3Mul(normalizedPos, SP_METERS_TO_PRERENDER(1.5)));
 					}
@@ -1228,7 +1293,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 
 			float quantityMultiplier = 1.0f;
 			float scaleMultiplier = 1.0f;
-			bool windAffected = (localEmitterTypeID != sp_vanillaEmitterTypeKilnFire) && !emitterState->covered;
+			bool windAffected = (localEmitterTypeID != sp_vanillaEmitterTypeKilnFire && localEmitterTypeID != sp_vanillaEmitterTypeKilnFireSmall && localEmitterTypeID != sp_vanillaEmitterTypeKilnFireMedium) && !emitterState->covered;
 			if(localEmitterTypeID == sp_vanillaEmitterTypeCampfireLarge || localEmitterTypeID == sp_vanillaEmitterTypeKilnFire)
 			{
 				quantityMultiplier = 3.0f;
@@ -1317,7 +1382,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 					SPParticleState state;
 
 					double heightOffsetMeters = 0.1;
-					if(localEmitterTypeID == sp_vanillaEmitterTypeKilnFire)
+					if(localEmitterTypeID == sp_vanillaEmitterTypeKilnFire || localEmitterTypeID == sp_vanillaEmitterTypeKilnFireSmall || localEmitterTypeID == sp_vanillaEmitterTypeKilnFireMedium)
 					{
 						heightOffsetMeters = 1.7;
 					}
@@ -1416,9 +1481,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 		{
 			particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.05);
 			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt));
-
 			particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v,  dt * 0.5));
-			particleState->p = spVec3Mul(spVec3Normalize(particleState->p), 1.0 + cumulusSmallAltitude);
 
 		}
 		else
@@ -1435,7 +1498,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 			}
 		}
 
-		particleState->p = spVec3Mul(spVec3Normalize(particleState->p), particleState->userData.x);
+		//particleState->p = spVec3Mul(spVec3Normalize(particleState->p), particleState->userData.x);
 
 		SPVec3 posLocal = spVec3Mul(spVec3Sub(particleState->p, origin), SP_RENDER_SCALE);
 		for(int v = 0; v < 4; v++)
