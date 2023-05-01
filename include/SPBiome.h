@@ -58,12 +58,13 @@ typedef struct SPBiomeThreadState {
 
 	uint32_t (*getSurfaceBaseTypeForFillObjectType)(struct SPBiomeThreadState*,uint32_t);
 
-	SPSimpleObjectSpawnerCollection* (*getSimpleObjectSpawnerCollection)(struct SPBiomeThreadState*);
-
-
 	SPRand* spRand;
 	SPNoise* spNoise1;
 	SPNoise* spNoise2;
+
+
+	SPSimpleObjectSpawnerCollection* (*getSimpleObjectSpawnerCollection)(struct SPBiomeThreadState*);
+
 } SPBiomeThreadState;
 
 
