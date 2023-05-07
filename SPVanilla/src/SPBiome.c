@@ -81,7 +81,9 @@ static uint32_t terrainVariation_steppeGrass;
 static uint32_t terrainVariation_tropicalRainforestGrass;
 static uint32_t terrainVariation_tropicalRainforestGrassPlentiful;
 static uint32_t terrainVariation_savannaGrass;
+static uint32_t terrainVariation_savannaGrassPlentiful;
 static uint32_t terrainVariation_tundraGrass;
+static uint32_t terrainVariation_tundraGrassPlentiful;
 static uint32_t terrainVariation_limestone;
 static uint32_t terrainVariation_redRock;
 static uint32_t terrainVariation_greenRock;
@@ -272,7 +274,9 @@ void spBiomeInit(SPBiomeThreadState* threadState)
 	terrainVariation_tropicalRainforestGrass				= threadState->getTerrainVariation(threadState, "tropicalRainforestGrass");
 	terrainVariation_tropicalRainforestGrassPlentiful		= threadState->getTerrainVariation(threadState, "tropicalRainforestGrassPlentiful");
 	terrainVariation_savannaGrass							= threadState->getTerrainVariation(threadState, "savannaGrass");
+	terrainVariation_savannaGrassPlentiful					= threadState->getTerrainVariation(threadState, "savannaGrassPlentiful");
 	terrainVariation_tundraGrass							= threadState->getTerrainVariation(threadState, "tundraGrass");
+	terrainVariation_tundraGrassPlentiful					= threadState->getTerrainVariation(threadState, "tundraGrassPlentiful");
 	terrainVariation_flint									= threadState->getTerrainVariation(threadState, "flint");
 	terrainVariation_clay									= threadState->getTerrainVariation(threadState, "clay");
 	terrainVariation_copperOre								= threadState->getTerrainVariation(threadState, "copperOre");
@@ -1227,18 +1231,44 @@ SPSurfaceTypeResult spBiomeGetSurfaceTypeForPoint(SPBiomeThreadState* threadStat
 				{
 					grassVariation = terrainVariation_tropicalRainforestGrassPlentiful;
 				}
-				else
+				else if(soilQuality == 1)
 				{
 					grassVariation = terrainVariation_tropicalRainforestGrass;
+				}
+				else
+				{
+					grassVariation = terrainVariation_temperateGrass;
 				}
 			}
 			if (tags[i] == biomeTag_savanna)
 			{
-				grassVariation = terrainVariation_savannaGrass;
+				if(soilQuality == 2)
+				{
+					grassVariation = terrainVariation_savannaGrassPlentiful;
+				}
+				else if(soilQuality == 1)
+				{
+					grassVariation = terrainVariation_savannaGrass;
+				}
+				else
+				{
+					grassVariation = terrainVariation_mediterraneanGrass;
+				}
 			}
 			if (tags[i] == biomeTag_tundra)
 			{
-				grassVariation = terrainVariation_tundraGrass;
+				if(soilQuality == 2)
+				{
+					grassVariation = terrainVariation_tundraGrassPlentiful;
+				}
+				else if(soilQuality == 1)
+				{
+					grassVariation = terrainVariation_tundraGrass;
+				}
+				else
+				{
+					grassVariation = terrainVariation_mediterraneanGrass;
+				}
 			}
 			if (tags[i] == biomeTag_temperate)
 			{
