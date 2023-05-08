@@ -1,9 +1,17 @@
 
 
 #include "SPHeight.h"
+#include "SPLog.h"
 
 #define TERRAIN_HEIGHT_MAXISH 0.0008
 
+void spHeightInit(SPNoise* noise1, 
+	SPNoise* noise2, 
+	SPWorldGenOptions worldGenOptions)
+{
+	//note: spHeightInit is provided as a convenience for modders, not used by vanilla mod.
+	spLog("spHeightInit");
+}
 
 bool spReplacesPreviousHeight()
 {
