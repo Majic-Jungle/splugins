@@ -851,7 +851,7 @@ static const double DEEP_SEA_LEVEL = SP_METERS_TO_PRERENDER(-1.1);
 
 #define getIsSandstone() (noiseValue < -0.7 + noiseValueSmall * 0.5 - soilRichnessNoiseValue * 0.5)
 
-#define getIsTinOre() (noiseValueMed > 0.2 && noiseValue > -0.1 && noiseValue < 0.1 && noiseValueSmall > -0.2)
+#define getIsTinOre() (noiseValueMed > 0.2 && noiseValue > -0.05 && noiseValue < 0.05 && noiseValueSmall > -0.2)
 
 #define getSandstoneTypeIndex() ((int)(fmod(SP_PRERENDER_TO_METERS(0.5 + baseAltitude) * 0.05 + noiseValue * 10.0, 3.999)))
 
