@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <math.h>
 
 #define SP_METERS_TO_PRERENDER(_meters_) ((_meters_) / 8388608.0)
