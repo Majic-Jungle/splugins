@@ -25,6 +25,7 @@ enum {
 	sp_vanillaEmitterTypeKilnFireMedium,
 	sp_vanillaEmitterTypeKilnFireSmall,
 	sp_vanillaEmitterTypeBlacksmithSparks,
+    sp_vanillaEmitterTypePlayerAvatarDefault,
 };
 
 enum {
@@ -43,13 +44,14 @@ enum {
 	sp_vanillaRenderGroupRain,
 	sp_vanillaRenderGroupRainBounce,
 	sp_vanillaRenderGroupSlowReleaseDust,
+    sp_vanillaRenderGroupPlayerAvatarSpark,
 };
 
 
 //define emitter types that we wish to override or add. Vanilla functions and functions for mods with earlier order indexes than this one that override the same type, will not get called.
 //Mods with later order indexes than this mod will win, so it's possible that even though you define behavior in the functions here, those functions may not actually get called..
 
-#define EMITTER_TYPES_COUNT 20
+#define EMITTER_TYPES_COUNT 21
 static SPParticleEmitterTypeInfo particleEmitterTypeInfos[EMITTER_TYPES_COUNT] = {
 	{
 		"campfireLarge",
@@ -131,6 +133,10 @@ static SPParticleEmitterTypeInfo particleEmitterTypeInfos[EMITTER_TYPES_COUNT] =
 		"blacksmithSparks",
 		sp_vanillaEmitterTypeBlacksmithSparks
 	},
+    {
+        "playerAvatarDefault",
+        sp_vanillaEmitterTypePlayerAvatarDefault
+    },
 };
 
 //define the vertex attributes that the shader will use. In the vanilla mod, all currently take the same, but this could be different for more complex shaders
@@ -151,7 +157,7 @@ static int extraVec3VertexDescriptionTypes[EXTRA_VEC3_VERTEX_ATTRIBUTE_COUNT] = 
 
 
 //define render groups that we wish to use, override or add. To use an existing/predefined render group, either define again or set vertexDescriptionTypeCount to 0
-#define RENDER_GROUP_TYPES_COUNT 15
+#define RENDER_GROUP_TYPES_COUNT 16
 static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 	{ 
 		"cloud",
@@ -303,20 +309,30 @@ static SPParticleRenderGroupInfo renderGroupInfos[RENDER_GROUP_TYPES_COUNT] = {
 		false,
 		false,
 	},
+    {
+        "spark",
+        sp_vanillaRenderGroupPlayerAvatarSpark,
+        EXTRA_VEC3_VERTEX_ATTRIBUTE_COUNT,
+        extraVec3VertexDescriptionTypes,
+        "img/particles.png",
+        NULL,
+        false,
+        false,
+    },
 };
 
-int spGetEmitterTypesCount()
+int spGetEmitterTypesCount(void)
 {
 	return EMITTER_TYPES_COUNT;
 }
 
-SPParticleEmitterTypeInfo* spGetEmitterTypes()
+SPParticleEmitterTypeInfo* spGetEmitterTypes(void)
 {
 	return particleEmitterTypeInfos;
 }
 
 
-int spGetRenderGroupTypesCount()
+int spGetRenderGroupTypesCount(void)
 {
 	return RENDER_GROUP_TYPES_COUNT;
 }
@@ -344,7 +360,7 @@ static const double cirrusCloudAltitude = SP_METERS_TO_PRERENDER(8000.0);
 static const double cirrusCloudScale = 60.0;
 
 
-SPParticleRenderGroupInfo* spGetRenderGroupTypes()
+SPParticleRenderGroupInfo* spGetRenderGroupTypes(void)
 {
 	return renderGroupInfos;
 }
@@ -361,7 +377,7 @@ void addClouds(SPParticleThreadState* threadState,
 	SPVec3 right = spVec3Normalize(spVec3Cross(north, normalizedPos));
 	SPVec3 negZ = spVec3Normalize(spVec3Cross(normalizedPos, right));
 
-	SPVec3 zeroVec = {0,0,0};
+//	SPVec3 zeroVec = {0,0,0};
 
 
 	SPParticleState state;
@@ -595,7 +611,6 @@ bool spEmitterWasAdded(SPParticleThreadState* threadState,
 	bool removeImmediately = false;
 	SPRand* spRand = threadState->spRand;
 
-
 	switch(localEmitterTypeID)
 	{
 	case sp_vanillaEmitterTypeCampfireLarge:
@@ -608,6 +623,7 @@ bool spEmitterWasAdded(SPParticleThreadState* threadState,
 	case sp_vanillaEmitterTypeKilnFire:
 	case sp_vanillaEmitterTypeKilnFireMedium:
 	case sp_vanillaEmitterTypeKilnFireSmall:
+    case sp_vanillaEmitterTypePlayerAvatarDefault:
 	{
 	
 	}
@@ -937,7 +953,7 @@ bool spEmitterWasAdded(SPParticleThreadState* threadState,
 
 			SPParticleState state;
 
-			double heightOffsetMeters = -0.2;
+			//double heightOffsetMeters = -0.2;
 
 			state.p = spVec3Add(emitterState->p, randPosVec);
 
@@ -1032,6 +1048,7 @@ void spEmitterWasUpdated(SPParticleThreadState* threadState,
 	SPParticleEmitterState* emitterState,
 	uint32_t localEmitterTypeID)
 {
+    emitterState->previousPos = emitterState->p;
 	emitterState->p = updatedState->p;
 	emitterState->rot = updatedState->rot;
 	emitterState->userData = updatedState->userData;
@@ -1216,6 +1233,52 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 			}
 		}
 		break;
+                
+                
+        case sp_vanillaEmitterTypePlayerAvatarDefault:
+        {
+            
+            
+            SPVec3 randVec = spRandGetVec3(spRand);
+            //SPVec3 randPosVec = spVec3Mul(randVec, SP_METERS_TO_PRERENDER(0.05));
+            SPVec3 randVelVec = spVec3Mul(randVec, 0.2);
+
+            SPParticleState state;
+
+            //double heightOffsetMeters = -0.2;
+        
+            SPVec3 lineVec = spVec3Sub(emitterState->previousPos, emitterState->p);
+            SPVec3 alongLine = spVec3Add(emitterState->p, spVec3Mul(lineVec, spRandGetValue(spRand)));
+
+            state.p = alongLine;//spVec3Add(emitterState->p, randPosVec);
+        
+            //double posLength = spVec3Length(emitterState->p);
+            //SPVec3 normalizedPos = spVec3Div(emitterState->p, posLength);
+
+            //state.v = spVec3Mul(spVec3Add(spVec3Mul(spMat3GetRow(emitterState->rot, 2), -1.0), randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 0.5);
+        
+            SPVec3 lookVelcocity = spVec3Mul(spMat3GetRow(emitterState->rot, 2), (-1.0));
+            state.v = spVec3Mul(spVec3Add(lookVelcocity, randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 1.0);
+        
+            state.particleTextureType = 3;
+            state.lifeLeft = 0.9;
+            state.scale = 0.02 + spRandGetValue(spRand) * 0.02;
+            state.randomValueA = spRandGetValue(spRand);
+            state.randomValueB = spRandGetValue(spRand);
+            state.gravity = spVec3Add(spVec3Mul(spMat3GetRow(emitterState->rot, 2), SP_METERS_TO_PRERENDER(-1.0)), spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(0.1)));
+
+            /*if(!emitterState->covered)
+            {
+                state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, 0.1));
+            }*/
+
+            (*threadState->addParticle)(threadState->particleManager,
+                emitterState,
+                sp_vanillaRenderGroupPlayerAvatarSpark,
+                &state);
+        }
+        break;
+
 
 		case sp_vanillaEmitterTypeCampfireLarge:
 		case sp_vanillaEmitterTypeCampfireMedium:
@@ -1536,6 +1599,10 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	{
 		lifeLeftMultiplier = (1.5 - particleState->randomValueB * 1.0);
 	}
+    else if(localRenderGroupTypeID == sp_vanillaRenderGroupPlayerAvatarSpark)
+    {
+        lifeLeftMultiplier = (1.5 - particleState->randomValueB * 1.0) * 0.25;
+    }
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupWaterRipples)
 	{
 		lifeLeftMultiplier = 0.5;
@@ -1698,6 +1765,20 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupRainBounce)
 	{
 	}
+    else if(localRenderGroupTypeID == sp_vanillaRenderGroupPlayerAvatarSpark)
+    {
+        particleState->v = spVec3Mul(particleState->v, spMax(1.0 - dt * 0.4, 0.0));
+        SPVec3 distanceVec = spVec3Sub(emitterState->p, particleState->p);
+        double distanceLength = spVec3Length(distanceVec);
+        if(distanceLength > SP_METERS_TO_PRERENDER(0.2))
+        {
+            SPVec3 distanceNormal = spVec3Div(distanceVec, distanceLength);
+            double distanceFraction = distanceLength - SP_METERS_TO_PRERENDER(1.0);
+            particleState->gravity = spVec3Mul(distanceNormal, distanceFraction);
+        }
+        particleState->v = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, spMin(dt * 10.0, 1.0)));
+        particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v, dt));
+    }
 	else
 	{
 		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.1);
@@ -1734,7 +1815,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 			upVector = normalVec;
 		}
 	}
-	else if(localRenderGroupTypeID == sp_vanillaRenderGroupSpark)
+	else if(localRenderGroupTypeID == sp_vanillaRenderGroupSpark || localRenderGroupTypeID == sp_vanillaRenderGroupPlayerAvatarSpark)
 	{
 		attributeFloatCount = 12;
 		upVector = spVec3Normalize(particleState->v);
@@ -1752,7 +1833,10 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 		renderBuffer[v * attributeFloatCount + 7] = particleState->randomValueA;
 		renderBuffer[v * attributeFloatCount + 8] = particleState->scale;
 
-		if(localRenderGroupTypeID == sp_vanillaRenderGroupRain || localRenderGroupTypeID == sp_vanillaRenderGroupFire || localRenderGroupTypeID == sp_vanillaRenderGroupSpark)
+		if(localRenderGroupTypeID == sp_vanillaRenderGroupRain || 
+           localRenderGroupTypeID == sp_vanillaRenderGroupFire ||
+           localRenderGroupTypeID == sp_vanillaRenderGroupSpark||
+           localRenderGroupTypeID == sp_vanillaRenderGroupPlayerAvatarSpark)
 		{
 			renderBuffer[v * attributeFloatCount + 9] = upVector.x;
 			renderBuffer[v * attributeFloatCount + 10] = upVector.y;

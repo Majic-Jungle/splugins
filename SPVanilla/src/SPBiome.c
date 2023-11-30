@@ -2065,7 +2065,7 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 								}
 
 
-								SPVec3 offsetE = {0.26,0.59,0.88};
+								//SPVec3 offsetE = {0.26,0.59,0.88};
 								scaledNoiseLoc = spVec3Mul(spVec3Add(noiseLookup, offsetD), 79.3);
 								noiseValue = spNoiseGet(threadState->spNoise1, scaledNoiseLoc, 2); 
 								if(noiseValue > 0.55)

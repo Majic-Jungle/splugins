@@ -353,7 +353,7 @@ SPVec4 spQuatSlerp(SPVec4 a, SPVec4 b, double fraction)
 	}
 }
 
-SPMat3 spMat3Identity()
+SPMat3 spMat3Identity(void)
 {
 	return spMat3IdentityMatrix;
 }

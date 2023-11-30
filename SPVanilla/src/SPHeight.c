@@ -13,7 +13,7 @@ void spHeightInit(SPNoise* noise1,
 	spLog("spHeightInit");
 }
 
-bool spReplacesPreviousHeight()
+bool spReplacesPreviousHeight(void)
 {
 	return true;
 }

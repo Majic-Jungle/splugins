@@ -41,6 +41,7 @@ typedef struct SPParticleEmitterState {
 	bool covered;
 	uint32_t globalType;
 	uint8_t counters[4];
+    SPVec3 previousPos;
 } SPParticleEmitterState;
 
 typedef struct SPParticleEmitterStateUpdate {
@@ -75,10 +76,10 @@ typedef struct SPParticleThreadState {
 	uint32_t frameCounter;
 } SPParticleThreadState;
 
-typedef int (* SPGetEmitterTypesCountFunc) ();
-typedef SPParticleEmitterTypeInfo* (* SPGetEmitterTypesFunc) ();
-typedef int (* SPGetRenderGroupTypesCountFunc) ();
-typedef SPParticleRenderGroupInfo* (* SPGetRenderGroupTypesFunc) ();
+typedef int (* SPGetEmitterTypesCountFunc) (void);
+typedef SPParticleEmitterTypeInfo* (* SPGetEmitterTypesFunc) (void);
+typedef int (* SPGetRenderGroupTypesCountFunc) (void);
+typedef SPParticleRenderGroupInfo* (* SPGetRenderGroupTypesFunc) (void);
 
 typedef bool (* SPEmitterWasAddedFunc) (SPParticleThreadState* threadState,
 	SPParticleEmitterState* emitterState,
@@ -102,10 +103,10 @@ typedef bool (* SPUpdateParticleFunc) (SPParticleThreadState* threadState,
 	SPVec3 origin, 
 	float* renderBuffer);
 
-MJ_EXPORT int spGetEmitterTypesCount();
-MJ_EXPORT SPParticleEmitterTypeInfo* spGetEmitterTypes();
-MJ_EXPORT int spGetRenderGroupTypesCount();
-MJ_EXPORT SPParticleRenderGroupInfo* spGetRenderGroupTypes();
+MJ_EXPORT int spGetEmitterTypesCount(void);
+MJ_EXPORT SPParticleEmitterTypeInfo* spGetEmitterTypes(void);
+MJ_EXPORT int spGetRenderGroupTypesCount(void);
+MJ_EXPORT SPParticleRenderGroupInfo* spGetRenderGroupTypes(void);
 
 MJ_EXPORT bool spEmitterWasAdded(SPParticleThreadState* threadState,
 	SPParticleEmitterState* emitterState,

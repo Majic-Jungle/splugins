@@ -8,7 +8,7 @@
 typedef void (* SPHeightInitFunc) (SPNoise* noise1, 
 	SPNoise* noise2, 
 	SPWorldGenOptions worldGenOptions);
-typedef bool (* SPReplacesPreviousHeightFunc) ();
+typedef bool (* SPReplacesPreviousHeightFunc) (void);
 typedef SPVec4 (* SPHeightGetFunc) (SPVec4 previousHeight,
 	SPNoise* noise1, 
 	SPNoise* noise2,
@@ -21,7 +21,7 @@ typedef SPVec4 (* SPHeightGetFunc) (SPVec4 previousHeight,
 MJ_EXPORT void spHeightInit(SPNoise* noise1, 
 	SPNoise* noise2, 
 	SPWorldGenOptions worldGenOptions);
-MJ_EXPORT bool spReplacesPreviousHeight();
+MJ_EXPORT bool spReplacesPreviousHeight(void);
 MJ_EXPORT SPVec4 spHeightGet(SPVec4 previousHeight,
 	SPNoise* noise1, 
 	SPNoise* noise2,
