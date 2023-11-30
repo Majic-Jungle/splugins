@@ -1238,44 +1238,45 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
         case sp_vanillaEmitterTypePlayerAvatarDefault:
         {
             
-            
-            SPVec3 randVec = spRandGetVec3(spRand);
-            //SPVec3 randPosVec = spVec3Mul(randVec, SP_METERS_TO_PRERENDER(0.05));
-            SPVec3 randVelVec = spVec3Mul(randVec, 0.2);
-
-            SPParticleState state;
-
-            //double heightOffsetMeters = -0.2;
-        
-            SPVec3 lineVec = spVec3Sub(emitterState->previousPos, emitterState->p);
-            SPVec3 alongLine = spVec3Add(emitterState->p, spVec3Mul(lineVec, spRandGetValue(spRand)));
-
-            state.p = alongLine;//spVec3Add(emitterState->p, randPosVec);
-        
-            //double posLength = spVec3Length(emitterState->p);
-            //SPVec3 normalizedPos = spVec3Div(emitterState->p, posLength);
-
-            //state.v = spVec3Mul(spVec3Add(spVec3Mul(spMat3GetRow(emitterState->rot, 2), -1.0), randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 0.5);
-        
-            SPVec3 lookVelcocity = spVec3Mul(spMat3GetRow(emitterState->rot, 2), (-1.0));
-            state.v = spVec3Mul(spVec3Add(lookVelcocity, randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 1.0);
-        
-            state.particleTextureType = 3;
-            state.lifeLeft = 0.9;
-            state.scale = 0.02 + spRandGetValue(spRand) * 0.02;
-            state.randomValueA = spRandGetValue(spRand);
-            state.randomValueB = spRandGetValue(spRand);
-            state.gravity = spVec3Add(spVec3Mul(spMat3GetRow(emitterState->rot, 2), SP_METERS_TO_PRERENDER(-1.0)), spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(0.1)));
-
-            /*if(!emitterState->covered)
+            //for(int i = 0; i < 2; i++)
             {
-                state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, 0.1));
-            }*/
-
-            (*threadState->addParticle)(threadState->particleManager,
-                emitterState,
-                sp_vanillaRenderGroupPlayerAvatarSpark,
-                &state);
+                SPVec3 randPosVec = spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(0.125));
+                SPVec3 randVelVec = spVec3Mul(spRandGetVec3(spRand), 0.2);
+                
+                SPParticleState state;
+                
+                //double heightOffsetMeters = -0.2;
+                
+                SPVec3 lineVec = spVec3Sub(emitterState->previousPos, emitterState->p);
+                SPVec3 alongLine = spVec3Add(emitterState->p, spVec3Mul(lineVec, spRandGetValue(spRand)));
+                
+                state.p = spVec3Add(alongLine, randPosVec);
+                
+                //double posLength = spVec3Length(emitterState->p);
+                //SPVec3 normalizedPos = spVec3Div(emitterState->p, posLength);
+                
+                //state.v = spVec3Mul(spVec3Add(spVec3Mul(spMat3GetRow(emitterState->rot, 2), -1.0), randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 0.5);
+                
+                SPVec3 lookVelcocity = spVec3Mul(spMat3GetRow(emitterState->rot, 2), (-1.0));
+                state.v = spVec3Mul(spVec3Add(lookVelcocity, randVelVec), SP_METERS_TO_PRERENDER(2.0 + spRandGetValue(spRand) * 0.5) * 1.0);
+                
+                state.particleTextureType = 3;
+                state.lifeLeft = 0.9;
+                state.scale = 0.02 + spRandGetValue(spRand) * 0.02;
+                state.randomValueA = spRandGetValue(spRand);
+                state.randomValueB = spRandGetValue(spRand);
+                state.gravity = spVec3Add(spVec3Mul(spMat3GetRow(emitterState->rot, 2), SP_METERS_TO_PRERENDER(-1.0)), spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(0.1)));
+                
+                /*if(!emitterState->covered)
+                 {
+                 state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, 0.1));
+                 }*/
+                
+                (*threadState->addParticle)(threadState->particleManager,
+                                            emitterState,
+                                            sp_vanillaRenderGroupPlayerAvatarSpark,
+                                            &state);
+            }
         }
         break;
 
@@ -1601,7 +1602,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	}
     else if(localRenderGroupTypeID == sp_vanillaRenderGroupPlayerAvatarSpark)
     {
-        lifeLeftMultiplier = (1.5 - particleState->randomValueB * 1.0) * 0.25;
+        lifeLeftMultiplier = (1.5 - particleState->randomValueB * 1.0) * 0.5;
     }
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupWaterRipples)
 	{
@@ -1767,16 +1768,17 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	}
     else if(localRenderGroupTypeID == sp_vanillaRenderGroupPlayerAvatarSpark)
     {
-        particleState->v = spVec3Mul(particleState->v, spMax(1.0 - dt * 0.4, 0.0));
+        particleState->v = spVec3Mul(particleState->v, spMax(1.0 - dt * 3.0, 0.0));
         SPVec3 distanceVec = spVec3Sub(emitterState->p, particleState->p);
         double distanceLength = spVec3Length(distanceVec);
-        if(distanceLength > SP_METERS_TO_PRERENDER(0.2))
+        if(distanceLength > SP_METERS_TO_PRERENDER(0.01))
         {
             SPVec3 distanceNormal = spVec3Div(distanceVec, distanceLength);
-            double distanceFraction = distanceLength - SP_METERS_TO_PRERENDER(1.0);
-            particleState->gravity = spVec3Mul(distanceNormal, distanceFraction);
+            double distanceFraction = (distanceLength - SP_METERS_TO_PRERENDER(0.25)) / SP_METERS_TO_PRERENDER(1.0);
+            distanceFraction = distanceFraction * distanceFraction * distanceFraction;
+            particleState->gravity = spVec3Mul(distanceNormal, SP_METERS_TO_PRERENDER(distanceFraction));
         }
-        particleState->v = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, spMin(dt * 10.0, 1.0)));
+        particleState->v = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, spMin(dt * 5.0, 1.0)));
         particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v, dt));
     }
 	else
