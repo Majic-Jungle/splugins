@@ -1602,7 +1602,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	}
     else if(localRenderGroupTypeID == sp_vanillaRenderGroupPlayerAvatarSpark)
     {
-        lifeLeftMultiplier = (1.5 - particleState->randomValueB * 1.0) * 0.5;
+        lifeLeftMultiplier = (1.5 - particleState->randomValueB * 1.0) * 0.125;
     }
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupWaterRipples)
 	{
