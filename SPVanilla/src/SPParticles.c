@@ -1265,8 +1265,22 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
                 state.scale = 0.02 + spRandGetValue(spRand) * 0.02;
                 state.randomValueA = spRandGetValue(spRand);
                 state.randomValueB = spRandGetValue(spRand);
-                state.gravity = spVec3Add(spVec3Mul(spMat3GetRow(emitterState->rot, 2), SP_METERS_TO_PRERENDER(-1.0)), spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(0.1)));
                 
+                //state.gravity = spVec3Add(spVec3Mul(spMat3GetRow(emitterState->rot, 2), SP_METERS_TO_PRERENDER(-1.0)), spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(1.0)));
+                
+                state.gravity = spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(1.0));
+                
+                /*
+                 
+                 SPVec3 distanceVec = spVec3Sub(emitterState->p, particleState->p);
+                 double distanceLength = spVec3Length(distanceVec);
+                 if(distanceLength > SP_METERS_TO_PRERENDER(0.01))
+                 {
+                     SPVec3 distanceNormal = spVec3Div(distanceVec, distanceLength);
+                     double distanceFraction = distanceLength / SP_METERS_TO_PRERENDER(1.0);
+                     particleState->gravity = spVec3Add(particleState->gravity, spVec3Mul(distanceNormal, SP_METERS_TO_PRERENDER(distanceFraction * spMin(dt * 4.0, 1.0))));
+                 }
+                 */
                 /*if(!emitterState->covered)
                  {
                  state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, 0.1));
@@ -1602,7 +1616,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	}
     else if(localRenderGroupTypeID == sp_vanillaRenderGroupPlayerAvatarSpark)
     {
-        lifeLeftMultiplier = (1.5 - particleState->randomValueB * 1.0) * 0.125;
+        lifeLeftMultiplier = (1.5 - particleState->randomValueB * 1.0) * 0.25;
     }
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupWaterRipples)
 	{
@@ -1774,11 +1788,10 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
         if(distanceLength > SP_METERS_TO_PRERENDER(0.01))
         {
             SPVec3 distanceNormal = spVec3Div(distanceVec, distanceLength);
-            double distanceFraction = (distanceLength - SP_METERS_TO_PRERENDER(0.25)) / SP_METERS_TO_PRERENDER(1.0);
-            distanceFraction = distanceFraction * distanceFraction * distanceFraction;
-            particleState->gravity = spVec3Mul(distanceNormal, SP_METERS_TO_PRERENDER(distanceFraction));
+            double distanceFraction = distanceLength / SP_METERS_TO_PRERENDER(1.0);
+            particleState->gravity = spVec3Add(particleState->gravity, spVec3Mul(distanceNormal, SP_METERS_TO_PRERENDER(distanceFraction * spMin(dt * 4.0, 1.0))));
         }
-        particleState->v = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, spMin(dt * 5.0, 1.0)));
+        particleState->v = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, spMin(dt * 2.0, 1.0) * particleState->lifeLeft));
         particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v, dt));
     }
 	else
