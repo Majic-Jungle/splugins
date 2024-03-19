@@ -10,7 +10,7 @@ void spHeightInit(SPNoise* noise1,
 	SPWorldGenOptions worldGenOptions)
 {
 	//note: spHeightInit is provided as a convenience for modders, not used by vanilla mod.
-	spLog("spHeightInit");
+	//spLog("spHeightInit");
 }
 
 bool spReplacesPreviousHeight(void)
