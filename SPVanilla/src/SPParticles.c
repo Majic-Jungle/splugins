@@ -26,6 +26,7 @@ enum {
 	sp_vanillaEmitterTypeKilnFireSmall,
 	sp_vanillaEmitterTypeBlacksmithSparks,
     sp_vanillaEmitterTypePlayerAvatarDefault,
+    sp_vanillaEmitterTypeWaterSplash,
 };
 
 enum {
@@ -51,7 +52,7 @@ enum {
 //define emitter types that we wish to override or add. Vanilla functions and functions for mods with earlier order indexes than this one that override the same type, will not get called.
 //Mods with later order indexes than this mod will win, so it's possible that even though you define behavior in the functions here, those functions may not actually get called..
 
-#define EMITTER_TYPES_COUNT 21
+#define EMITTER_TYPES_COUNT 22
 static SPParticleEmitterTypeInfo particleEmitterTypeInfos[EMITTER_TYPES_COUNT] = {
 	{
 		"campfireLarge",
@@ -136,6 +137,10 @@ static SPParticleEmitterTypeInfo particleEmitterTypeInfos[EMITTER_TYPES_COUNT] =
     {
         "playerAvatarDefault",
         sp_vanillaEmitterTypePlayerAvatarDefault
+    },
+    {
+        "waterSplash",
+        sp_vanillaEmitterTypeWaterSplash
     },
 };
 
@@ -994,6 +999,96 @@ bool spEmitterWasAdded(SPParticleThreadState* threadState,
 		}
 	}
 	break;
+            
+    case sp_vanillaEmitterTypeWaterSplash:
+    {
+        removeImmediately = true;
+        double posLength = spVec3Length(emitterState->p);
+        SPVec3 normalizedPos = spVec3Div(emitterState->p, posLength);
+        
+        
+        SPVec3 right = spMat3GetRow(emitterState->rot, 0);
+        SPVec3 up = spMat3GetRow(emitterState->rot, 1);
+        SPVec3 forward = spMat3GetRow(emitterState->rot, 2);
+        
+        SPVec3 gravity = spVec3Mul(normalizedPos, SP_METERS_TO_PRERENDER(-10.0) * 1.0);
+
+
+        for(int i = 0; i < 20; i++)
+        {
+            SPParticleState state;
+            SPVec3 randPosVec = spVec3Mul(spRandGetVec3(spRand), SP_METERS_TO_PRERENDER(0.3));
+            SPVec3 randVelVec = spRandGetVec3(spRand);
+            state.p = spVec3Add(spVec3Mul(normalizedPos, posLength), randPosVec);
+            state.v = spVec3Mul(spVec3Add(normalizedPos, randVelVec), SP_METERS_TO_PRERENDER(1.6));
+            state.particleTextureType = 7;
+            state.lifeLeft = 1.0;
+            state.randomValueA = 0.5 + (spRandGetValue(spRand) - 0.5) * 0.3;
+            state.gravity = gravity;
+            state.scale = 0.5 + spRandGetValue(spRand) * 0.5;
+
+            (*threadState->addParticle)(threadState->particleManager,
+                emitterState,
+                sp_vanillaRenderGroupDust,
+                &state);
+        }
+        
+        
+        SPVec3 randVec = spRandGetVec3(spRand);
+        SPVec3 randPosVec = spVec3Mul(randVec, SP_METERS_TO_PRERENDER(0.2));
+
+        SPParticleState state;
+
+        SPVec3 zeroVec = {0,0,0};
+
+        SPVec3 posVec = spVec3Add(normalizedPos, randPosVec);
+
+        state.p = spVec3Normalize(posVec);
+        state.v = zeroVec;
+        state.particleTextureType = 3;
+        state.lifeLeft = 1.0;
+        state.scale = 0.2 + spRandGetValue(spRand) * 0.2;
+        state.randomValueA = spRandGetValue(spRand);
+        state.randomValueB = spRandGetValue(spRand);
+        state.gravity = zeroVec;
+
+        (*threadState->addParticle)(threadState->particleManager,
+            emitterState,
+            sp_vanillaRenderGroupWaterRipples,
+            &state);
+        
+        
+        for(int i = 0; i < 4; i++)
+        {
+            SPParticleState state;
+            SPVec3 pos = spVec3Add(emitterState->p, spVec3Mul(right, SP_METERS_TO_PRERENDER((spRandGetValue(spRand) - 0.5) * 40.0)));
+            pos = spVec3Add(pos, spVec3Mul(forward, SP_METERS_TO_PRERENDER((spRandGetValue(spRand) - 0.5) * 40.0)));
+            state.p = pos;
+
+            state.v = spVec3Mul(up, SP_METERS_TO_PRERENDER(-10.0));
+            state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, 2.0));
+
+            double randValue = spRandGetValue(spRand);
+            state.lifeLeft = 1.0;
+            state.randomValueA = 0.5 + (randValue - 0.5) * 0.3;
+            state.scale = 0.01;
+
+            (*threadState->addParticle)(threadState->particleManager,
+                emitterState,
+                sp_vanillaRenderGroupRain,
+                &state);
+
+
+            state.particleTextureType = 22;
+            state.scale = 0.02 + 0.02 * randValue;
+
+            (*threadState->addParticle)(threadState->particleManager,
+                emitterState,
+                sp_vanillaRenderGroupRainBounce,
+                &state);
+        }
+    }
+    break;
 	}
 
 	if(!removeImmediately)
