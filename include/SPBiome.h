@@ -28,7 +28,10 @@ typedef struct SPSimpleObjectSpawnerInfo {
 	uint16_t disallowedTagsCount;
 	uint16_t* disallowedTags;
 
-	double frequency;
+	uint16_t minSpawnObjectCount;
+	uint16_t maxSpawnObjectCount;
+	double spawnChanceFraction;
+
 	double minAltitude;
 	double maxAltitude;
 

@@ -161,9 +161,9 @@ static uint32_t gameObjectType_pineBranch;
 static uint32_t gameObjectType_willowBranch;
 static uint32_t gameObjectType_bambooBranch;
 
-static uint32_t gameObjectType_deadAlpaca;
-static uint32_t gameObjectType_deadMammoth;
-static uint32_t gameObjectType_bone;
+//static uint32_t gameObjectType_deadAlpaca;
+//static uint32_t gameObjectType_deadMammoth;
+//static uint32_t gameObjectType_bone;
 
 #define BIRCH_TYPE_COUNT 4
 static uint32_t gameObjectType_birchTypes[BIRCH_TYPE_COUNT];
@@ -402,9 +402,9 @@ void spBiomeInit(SPBiomeThreadState* threadState)
 		gameObjectType_bambooTypes[0] = threadState->getGameObjectTypeIndex(threadState, "bamboo1");
 		gameObjectType_smallBamboo = threadState->getGameObjectTypeIndex(threadState, "bamboo2");
 
-		gameObjectType_deadAlpaca = threadState->getGameObjectTypeIndex(threadState, "deadAlpaca");
-		gameObjectType_deadMammoth = threadState->getGameObjectTypeIndex(threadState, "deadMammoth");
-		gameObjectType_bone = threadState->getGameObjectTypeIndex(threadState, "bone");
+		//gameObjectType_deadAlpaca = threadState->getGameObjectTypeIndex(threadState, "deadAlpaca");
+		//gameObjectType_deadMammoth = threadState->getGameObjectTypeIndex(threadState, "deadMammoth");
+		//gameObjectType_bone = threadState->getGameObjectTypeIndex(threadState, "bone");
 
 		spawnerCollection = threadState->getSimpleObjectSpawnerCollection(threadState);
 	}
@@ -2086,7 +2086,7 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 						}
 					}
 
-					bool addCarcass = spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 73958, 400) == 1;
+					/*bool addCarcass = spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 73958, 400) == 1;
 					if(addCarcass == 1)
 					{
 						uint32_t carcassType = gameObjectType_deadAlpaca;
@@ -2100,7 +2100,7 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 							carcassType = gameObjectType_deadMammoth;
 						}
 						ADD_OBJECT(carcassType);
-					}
+					}*/
 				}
 				else if(level == SP_SUBDIVISIONS - 2)
 				{
@@ -2370,9 +2370,42 @@ int spBiomeGetTransientGameObjectTypesForFaceSubdivision(SPBiomeThreadState* thr
 				{
 					if(baseAltitude > info->minAltitude && baseAltitude < info->maxAltitude)
 					{
-						if(spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 51117 + i, 1 + 10 / info->frequency) == 0)
+						bool meetsTagRequirements = true;
+						if(info->requiredTagsCount > 0)
 						{
-							int objectCount = (((int)spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 5243, 40)) - 39 + info->frequency * 4);
+							meetsTagRequirements = false;
+							for(int j = 0; j < info->requiredTagsCount; j++)
+							{
+								if(getHasSingleTag(biomeTags, tagCount, info->requiredTags[j]))
+								{
+									meetsTagRequirements = true;
+									break;
+								}
+							}
+						}
+
+						if(meetsTagRequirements)
+						{
+							if(info->disallowedTagsCount > 0)
+							{
+								for(int j = 0; j < info->disallowedTagsCount; j++)
+								{
+									if(getHasSingleTag(biomeTags, tagCount, info->disallowedTags[j]))
+									{
+										meetsTagRequirements = false;
+										break;
+									}
+								}
+							}
+						}
+
+						if(meetsTagRequirements && spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 51117 + i, 100000000) < 100000000 * info->spawnChanceFraction)
+						{
+							int objectCount = info->minSpawnObjectCount;
+							if(info->minSpawnObjectCount < info->maxSpawnObjectCount)
+							{
+								objectCount += (((int)spRandomIntegerValueForUniqueIDAndSeed(faceUniqueID, 5243, info->maxSpawnObjectCount - info->minSpawnObjectCount)));
+							}
 
 							for(int j = 0; j < objectCount; j++)
 							{
