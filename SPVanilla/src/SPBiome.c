@@ -1394,12 +1394,14 @@ SPSurfaceTypeResult spBiomeGetSurfaceTypeForPoint(SPBiomeThreadState* threadStat
 		{
 			SPSurfaceTypeDefault variationDefaults = threadState->getSurfaceDefaultsForVariationType(threadState, terrainVariation_deepWater);
 			result.pathDifficultyIndex = variationDefaults.pathDifficultyIndex;
+			result.decalTypeIndex = variationDefaults.decalGroupIndex;
 			variations[result.variationCount++] = terrainVariation_deepWater;
 		}
 		else
 		{
 			SPSurfaceTypeDefault variationDefaults = threadState->getSurfaceDefaultsForVariationType(threadState, terrainVariation_shallowWater);
 			result.pathDifficultyIndex = variationDefaults.pathDifficultyIndex;
+			result.decalTypeIndex = variationDefaults.decalGroupIndex;
 			variations[result.variationCount++] = terrainVariation_shallowWater;
 		}
 	}
