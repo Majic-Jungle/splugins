@@ -1434,6 +1434,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 				{
 					//state.lifeLeft = 0.2;
 					state.randomValueB += 8.0;
+					state.scale *= 0.1;
 					//state.scale = state.scale * 0.5;
 				}
 				SPVec3 lookup = {(normalizedPos.x + 1.2) * 99999.9, ((normalizedPos.y + 1.2) * 4.5 + (normalizedPos.z + 1.2) + 2.4) * 99999.9, emitterState->timeAccumulatorB * 0.1};
@@ -1443,10 +1444,16 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 				double noiseValueB = spNoiseGet(threadState->spNoise, lookupB, 2);
 				double noiseValueC = spNoiseGet(threadState->spNoise, lookupC, 2);
 
-				state.v = spVec3Mul(normalizedPos, SP_METERS_TO_PRERENDER(0.9 + noiseValueC) * 0.7);
+				double verticalSpeed = 1.7;
+				if(localEmitterTypeID == sp_vanillaEmitterTypeTorchLarge || localEmitterTypeID == sp_vanillaEmitterTypeTorchSmall)
+				{
+					verticalSpeed = 0.6;
+				}
+
+				state.v = spVec3Mul(normalizedPos, SP_METERS_TO_PRERENDER(0.9 + noiseValueC) * verticalSpeed);
 				if(!emitterState->covered)
 				{
-					state.v = spVec3Mix(state.v, spVec3Mul(threadState->windVelocity, 0.1), spClamp(threadState->windStrength * 0.25, 0.0, 0.67));
+					state.v = spVec3Mix(state.v, spVec3Mul(threadState->windVelocity, 0.02), spClamp(threadState->windStrength * 0.25, 0.0, 0.67));
 				}
 
 				state.gravity = spVec3Mul(spMat3GetRow(emitterState->rot, 0), SP_METERS_TO_PRERENDER(noiseValue) * 2.5);
@@ -1485,7 +1492,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 			else if(localEmitterTypeID == sp_vanillaEmitterTypeTorchSmall)
 			{
 				quantityMultiplier = 0.25f;
-				scaleMultiplier = 0.2f;
+				scaleMultiplier = 0.1f;
 			}
 
 			if(emitterState->counters[1] == 0) //FLAME 1
@@ -1762,7 +1769,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.05);
 		if(!emitterState->covered)
 		{
-			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt));
+			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.25));
 		}
 
 		SPVec3 vel = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, (1.0 - particleState->lifeLeft))); //gravity is random wind
