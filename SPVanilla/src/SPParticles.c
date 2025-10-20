@@ -1427,7 +1427,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 
 				state.particleTextureType = ((spRandGetValue(spRand) > 0.5) ? 2 : 5);
 				state.lifeLeft = 1.0;
-				state.scale = 0.2 + spRandGetValue(spRand) * 0.2;
+				state.scale = 0.1 + spRandGetValue(spRand) * 0.05;
 				state.randomValueA = spRandGetValue(spRand);
 				state.randomValueB = spRandGetValue(spRand);
 				if(localEmitterTypeID == sp_vanillaEmitterTypeTorchLarge || localEmitterTypeID == sp_vanillaEmitterTypeTorchSmall)
@@ -1447,7 +1447,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 				double verticalSpeed = 1.7;
 				if(localEmitterTypeID == sp_vanillaEmitterTypeTorchLarge || localEmitterTypeID == sp_vanillaEmitterTypeTorchSmall)
 				{
-					verticalSpeed = 0.6;
+					verticalSpeed = 1.2;
 				}
 
 				state.v = spVec3Mul(normalizedPos, SP_METERS_TO_PRERENDER(0.9 + noiseValueC) * verticalSpeed);
@@ -1702,7 +1702,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 
 	if(localRenderGroupTypeID == sp_vanillaRenderGroupSmoke)
 	{
-		lifeLeftMultiplier = 0.05 + particleState->randomValueB * 0.1;
+		lifeLeftMultiplier = 0.08 + particleState->randomValueB * 0.08;
 		if(!emitterState->covered)
 		{
 			lifeLeftMultiplier += threadState->windStrength * 0.1;
@@ -1760,19 +1760,19 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	{
 		if(!emitterState->covered)
 		{
-			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.1));
+			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.05));
 		}
 		particleState->p = spVec3Add(particleState->p, spVec3Mul(particleState->v, (2.0 - lifeLeft) * dt * 1.5));
 	}
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupSmoke)
 	{
-		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.05);
+		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.03);
 		if(!emitterState->covered)
 		{
-			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.25));
+			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.2));
 		}
 
-		SPVec3 vel = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, (1.0 - particleState->lifeLeft))); //gravity is random wind
+		SPVec3 vel = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, (1.0 - particleState->lifeLeft) * 0.5)); //gravity is random wind
 
 		particleState->p = spVec3Add(particleState->p, spVec3Mul(vel, dt));
 
@@ -1782,7 +1782,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 			windStrengthToUse = threadState->windStrength;
 		}
 
-		particleState->scale = particleState->scale + dt * (particleState->lifeLeft * particleState->lifeLeft) * (1.0 + particleState->randomValueA) * 0.15 * (1.0 + windStrengthToUse);
+		particleState->scale = particleState->scale + dt * (particleState->lifeLeft * (0.5 + particleState->lifeLeft)) * (1.0 + particleState->randomValueA) * 0.1 * (1.0 + windStrengthToUse);
 	}
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupDust)
 	{
@@ -1925,7 +1925,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 		SPVec3 normalVec = spVec3Normalize(particleState->p);
 		if(!emitterState->covered)
 		{
-			upVector = spVec3Normalize(spVec3Mix(normalVec, spVec3Normalize(threadState->windVelocity), spClamp(threadState->windStrength * 0.25, 0.0, 0.67)));
+			upVector = spVec3Normalize(spVec3Mix(normalVec, spVec3Normalize(threadState->windVelocity), spClamp(threadState->windStrength * 0.125, 0.0, 0.67)));
 		}
 		else
 		{
