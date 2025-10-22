@@ -1436,8 +1436,8 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 				{
 					//state.lifeLeft = 0.2;
 					state.randomValueB *= 4.0;
-					state.scale *= 0.1;
-					verticalSpeed *= 0.1;
+					state.scale *= 0.6;
+					verticalSpeed *= 0.7;
 					//state.scale = state.scale * 0.5;
 				}
 				else if(localEmitterTypeID == sp_vanillaEmitterTypeCampfireLarge || localEmitterTypeID == sp_vanillaEmitterTypeKilnFire) //big
@@ -1450,7 +1450,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 				{
 					state.scale *= 0.2;
 					state.randomValueB *= 2.0;
-					verticalSpeed *= 0.5;
+					verticalSpeed *= 0.7;
 				}
 
 				SPVec3 lookup = {(normalizedPos.x + 1.2) * 99999.9, ((normalizedPos.y + 1.2) * 4.5 + (normalizedPos.z + 1.2) + 2.4) * 99999.9, emitterState->timeAccumulatorB * 0.1};
@@ -1793,7 +1793,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 			windStrengthToUse = threadState->windStrength;
 		}
 
-		particleState->scale = particleState->scale + dt * (particleState->lifeLeft * particleState->lifeLeft) / particleState->randomValueB * (1.0 + particleState->randomValueA) * 0.15 * (1.0 + windStrengthToUse);
+		particleState->scale = particleState->scale + dt / particleState->randomValueB * (1.0 + particleState->randomValueA) * 0.3 * (1.0 + windStrengthToUse);
 	}
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupDust)
 	{
