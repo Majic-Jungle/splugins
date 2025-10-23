@@ -1444,7 +1444,7 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 				{
 					state.scale *= 1.2;
 					state.randomValueB *= 0.7;
-					verticalSpeed *= 1.7;
+					verticalSpeed *= 1.3;
 				}
 				else if(localEmitterTypeID == sp_vanillaEmitterTypeCampfireSmall || localEmitterTypeID == sp_vanillaEmitterTypeKilnFireSmall) //small
 				{
