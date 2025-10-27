@@ -1430,27 +1430,27 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 				state.scale = 0.15 + spRandGetValue(spRand) * 0.05;
 				state.randomValueA = spRandGetValue(spRand);
 				state.randomValueB = (1.0 + spRandGetValue(spRand) * 0.1) * 2.0;
-				double verticalSpeed = 1.0;
+				double verticalSpeed = 0.7;
 
 				if(localEmitterTypeID == sp_vanillaEmitterTypeTorchLarge || localEmitterTypeID == sp_vanillaEmitterTypeTorchSmall) //tiny
 				{
 					//state.lifeLeft = 0.2;
-					state.randomValueB *= 5.0;
+					state.randomValueB *= 2.0;
 					state.scale *= 0.7;
-					verticalSpeed = 0.5;
+					verticalSpeed = 0.3;
 					//state.scale = state.scale * 0.5;
 				}
 				else if(localEmitterTypeID == sp_vanillaEmitterTypeCampfireLarge || localEmitterTypeID == sp_vanillaEmitterTypeKilnFire) //big
 				{
 					state.scale *= 1.2;
 					state.randomValueB *= 0.7;
-					verticalSpeed = 2.0;
+					verticalSpeed = 1.2;
 				}
 				else if(localEmitterTypeID == sp_vanillaEmitterTypeCampfireSmall || localEmitterTypeID == sp_vanillaEmitterTypeKilnFireSmall) //small
 				{
 					state.scale *= 0.8;
-					state.randomValueB *= 2.0;
-					verticalSpeed = 0.7;
+					state.randomValueB *= 1.5;
+					verticalSpeed = 0.5;
 				}
 
 				SPVec3 lookup = {(normalizedPos.x + 1.2) * 99999.9, ((normalizedPos.y + 1.2) * 4.5 + (normalizedPos.z + 1.2) + 2.4) * 99999.9, emitterState->timeAccumulatorB * 0.1};
@@ -1496,15 +1496,10 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 				quantityMultiplier = 0.5f;
 				scaleMultiplier = 0.3f;
 			}
-			else if(localEmitterTypeID == sp_vanillaEmitterTypeTorchLarge)
+			else if(localEmitterTypeID == sp_vanillaEmitterTypeTorchLarge || localEmitterTypeID == sp_vanillaEmitterTypeTorchSmall)
 			{
 				quantityMultiplier = 0.5f;
 				scaleMultiplier = 0.3f;
-			}
-			else if(localEmitterTypeID == sp_vanillaEmitterTypeTorchSmall)
-			{
-				quantityMultiplier = 0.25f;
-				scaleMultiplier = 0.1f;
 			}
 
 			if(emitterState->counters[1] == 0) //FLAME 1
@@ -1774,7 +1769,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 	}
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupSmoke)
 	{
-		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.03);
+		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.2);
 		if(!emitterState->covered)
 		{
 			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.2));
@@ -1791,7 +1786,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 			windStrengthToUse = threadState->windStrength;
 		}
 
-		particleState->scale = particleState->scale + dt / (0.5 + particleState->randomValueB * 0.5) * (1.0 + particleState->randomValueA) * 0.2 * (1.0 + windStrengthToUse);
+		particleState->scale = particleState->scale + dt / (1.0 + particleState->randomValueB * 1.0) * (1.0 + particleState->randomValueA) * 0.2 * (1.0 + windStrengthToUse);
 	}
 	else if(localRenderGroupTypeID == sp_vanillaRenderGroupDust)
 	{
