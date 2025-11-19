@@ -1462,7 +1462,10 @@ void spUpdateEmitter(SPParticleThreadState* threadState,
 
 
 				state.v = spVec3Mul(normalizedPos, SP_METERS_TO_PRERENDER(0.9 + noiseValueC * 0.1) * verticalSpeed);
-				//if(!emitterState->covered)
+				if(!emitterState->covered)
+				{
+					state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, 0.25));
+				}
 				//{
 					//state.v = spVec3Add(state.v, spVec3Mul(threadState->windVelocity, (1.0 + noiseValueC * 0.5) * 0.5 * spClamp(threadState->windStrength * 0.5, 0.2, 0.67)));
 				//}
@@ -1772,7 +1775,7 @@ bool spUpdateParticle(SPParticleThreadState* threadState,
 		particleState->v = spVec3Mul(particleState->v, 1.0 - dt * 0.2);
 		if(!emitterState->covered)
 		{
-			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt * 0.2));
+			particleState->v = spVec3Add(particleState->v, spVec3Mul(threadState->windVelocity, dt));
 		}
 
 		particleState->v = spVec3Add(particleState->v, spVec3Mul(particleState->gravity, dt * 1.0)); //gravity is random wind
